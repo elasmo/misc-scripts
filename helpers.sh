@@ -13,7 +13,7 @@ spiceme() {
     running=$(virsh list --inactive | awk '{print $2}' | grep ^${1}$)
     if [ "${running}" != "" ]; then
         virsh start ${1}
-    elif [ ! $(virsh dominfo ${1} 2> /dev/null) ]; then
+    elif [ ! "$(virsh dominfo ${1} 2> /dev/null)" ]; then
         echo "Domain '${1}' not found."
         echo
         virsh list --all
