@@ -33,7 +33,7 @@ vmclone() {
         return $?
     fi
 
-    virt-clone -o ${source} -n ${dest} -f /var/lib/libvirt/images/${dest}.img
+    virt-clone -o ${source} -n ${dest} -f ${diskimage}
 }
 
 urlencode() {
