@@ -12,6 +12,12 @@ fi
 spiceme() {
     running="$(virsh list --inactive | awk '{print $2}' | grep ^${1}$)"
 
+    # Revert to a known good state if name is set to 'guest'
+    if [ "${1}" == "guest" ]; then
+        echo "Reverting to known good state"
+        virsh snapshot-revert guest guest-knowngood 
+    fi
+
     if [ "${running}" != "" ]; then
         virsh start ${1}
     elif [ ! "$(virsh dominfo ${1} 2> /dev/null)" ]; then
