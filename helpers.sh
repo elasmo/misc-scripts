@@ -4,16 +4,19 @@
 #
 
 alias vl='virsh list --all'
-alias guestsnap='virsh snapshot-create-as --domain guest --name $(uuidgen)'
 
 if [ "$(pgrep ^spice-vdagent$)" == "" ]; then
     spice-vdagent
 fi
 
+snapshot() {
+    virsh snapshot-create-as --domain "${1}" --name "knowngood-$(date +%s)"
+}
+
 spiceme() {
     running="$(virsh list --inactive | awk '{print $2}' | grep ^${1}$)"
 
-    # Revert to a known good state if name is set to 'guest'
+    # Always revert to known-good state if name is set to guest
     if [ "${1}" == "guest" ]; then
         virsh snapshot-revert guest --current
     fi
