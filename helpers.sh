@@ -10,7 +10,7 @@ if [ "$(pgrep ^spice-vdagent$)" == "" ]; then
 fi
 
 snapshot() {
-    virsh snapshot-create-as --domain "${1}" --name "knowngood-$(date +%s)"
+    virsh snapshot-create-as --domain "${1}" --name "snapshot-$(date +%s)"
 }
 
 spiceme() {
