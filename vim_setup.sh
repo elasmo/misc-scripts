@@ -12,7 +12,7 @@ vimrc_remote="https://raw.githubusercontent.com/elasmo/dot-files/master/dot-vimr
 [ ! -d ${bundle} ] && mkdir -p ${autoload}
 [ -e ${vimrc} ] && cp ${vimrc} "${vimrc}.bak"
 
-curl -LSso ${vimrc} ${vimrc_remote}
+curl -Sso ${vimrc} ${vimrc_remote}
 [ ! -e ${autoload}/pathogen.vim ] && curl -LSso ${autoload}/pathogen.vim https://tpo.pe/pathogen.vim
 [ ! -d ${bundle}/vim-airline ] && git clone https://github.com/vim-airline/vim-airline ${bundle}/vim-airline
 [ ! -d ${bundle}/vim-airline-themes ] && git clone https://github.com/vim-airline/vim-airline-themes ${bundle}/vim-airline-themes
