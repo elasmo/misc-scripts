@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
 # Various helpers
+# ...preferably sourced from ~/.bashrc
 #
 
 alias vl='virsh list --all'
