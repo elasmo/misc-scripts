@@ -2,8 +2,6 @@
 #
 # Fetches debian iso, verifies sha512 hash and signature
 #
-# Dependencies: dirmngr, gpg, curl, openssl
-#
 
 base="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd"
 
@@ -15,9 +13,16 @@ iso_url="${base}/${iso_file}"
 sha_url="${base}/SHA512SUMS"
 sig_url="${base}/SHA512SUMS.sign"
 
+which curl > /dev/null || { echo >&2 "error: curl not found"; exit 1; }
+which gpg > /dev/null || { echo >&2 "error: gpg not found"; exit 1; }
+which openssl > /dev/null || { echo >&2 "error: openssl not found"; exit 1; }
+which dirmngr > /dev/null || { echo >&2 "error: dirmngr not found"; exit 1; }
+
 if [ ! -f ${iso_file} ]; then
     echo -n "=== Fetching ${iso_url}..."
     curl -sLO "${iso_url}" && echo "OK" || { echo >&2 "failed"; exit 1; }
+else 
+    echo "=== Found ${iso_file}"
 fi
 
 echo -n "=== Verifying hash..."
