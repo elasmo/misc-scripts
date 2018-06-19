@@ -6,12 +6,7 @@ server=$1
 port=$2
 ciphers=$(openssl ciphers 'ALL:eNULL' | sed -e 's/:/ /g')
 
-error() {
-    echo >&2 "$@"
-    exit 1
-}
-
-[ "$#" -gt 0 ] || error "Usage: $0 <server> [port]"
+[ "$#" -gt 0 ] || { echo >&2 "Usage: $0 <server> [port]"; exit 1; }
 [ -n "$2" ] || port=443
 
 for cipher in ${ciphers[@]}; do
