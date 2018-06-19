@@ -14,8 +14,6 @@ error() {
 [ "$#" -gt 0 ] || error "Usage: $0 <server> [port]"
 [ -n "$2" ] || port=443
 
-echo "=== Enumerating supported cipher suites for ${server}:${port}"
-
 for cipher in ${ciphers[@]}; do
     resp=$(echo -n | openssl s_client -cipher "${cipher}" -connect ${server}:${port} 2>&1)
     if [[ ! "${resp}" =~ ":error:" ]] ; then
