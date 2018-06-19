@@ -14,8 +14,6 @@ error() {
 [ "$#" -gt 0 ] || error "Usage: $0 <server> [port]"
 [ -n "$2" ] || port=443
 
-which openssl > /dev/null || error "openssl not found"
-
 echo "=== Enumerating supported cipher suites for ${server}:${port}"
 
 for cipher in ${ciphers[@]}; do
