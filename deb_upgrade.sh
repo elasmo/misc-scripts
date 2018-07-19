@@ -32,3 +32,7 @@ apt -y update || error "update failed"
 
 echo "==> Performing dist upgrade"
 apt -y dist-upgrade || error "dist-upgrade failed"
+
+echo "==> Cleaning up"
+apt autoremove || error "autoremove failed"
+apt clean || error "clean failed"
