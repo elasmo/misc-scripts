@@ -15,7 +15,7 @@ databases=(
 )
 
 error() {
-    logger -t ${script_name} "$@ $-"
+    logger -t ${script_name} "$@"
     exit 1
 }
 
