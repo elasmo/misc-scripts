@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-trap close_ports EXIT
 
 if [ $(whoami) != "root" ]; then
     error "$(whoami) are not welcome here!"
@@ -36,6 +35,8 @@ close_ports() {
     done
 }
 
+trap close_ports EXIT
+
 for port in ${ports}; do
     for host in ${hosts[@]}; do
         pprint "Opening ${host}:${port}"
@@ -45,10 +46,10 @@ for port in ${ports}; do
 done
 
 pprint "Updating local repository"
-apt -y update || error "update failed"
+apt -y update || error "apt update failed"
 
 pprint "Performing dist upgrade"
-apt -y dist-upgrade || error "dist-upgrade failed"
+apt -y dist-upgrade || error "apt dist-upgrade failed"
 
 pprint "Cleaning up"
 apt autoremove || error "autoremove failed"
