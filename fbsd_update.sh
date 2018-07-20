@@ -29,8 +29,7 @@ pkg clean -ay
 pecho "Installing base and kernel updates on ${local_machine}"
 PAGER=cat freebsd-update --not-running-from-cron fetch install
 
-for jail in ${jails}
-do
+for jail in ${jails}; do
     pecho "Updating local repository on ${jail}"
     pkg -j ${jail} update
 
