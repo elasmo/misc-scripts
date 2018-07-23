@@ -29,12 +29,12 @@ pprint "Shells"                 "$(cat /etc/shells | grep -v ^#)"
 pprint "SUID files"             "$(find / -perm -4000 -type f 2> /dev/null)"
 pprint "SUID owned by root"     "$(find / -uid 0 -perm -4000 -type f 2> /dev/null)"
 pprint "GUID files"             "$(find / -perm -2000 -type f 2> /dev/null)"
-pprint "World writable files"      "$(find / ! -path "*/proc/*" -perm -2 -type f 2> /dev/null)"
+pprint "World writable files"       "$(find / ! -path "*/proc/*" -perm -2 -type f 2> /dev/null)"
 pprint "World writeable directories" \
                                 "$(find / -perm -2 -type d 2>/dev/null)"
 pprint "/root"                  "$(ls -ahlR /root 2>/dev/null || echo "N/A")"
-pprint "SSH files"              "$(find / -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" \ 
-                                -o -name "authorized_keys" 2>/dev/null |xargs -r ls -la)"
+pprint "SSH files"              "$(find / -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" \
+                                    2> /dev/null | while read filename; do ls -l $filename && base64 $filename && echo; done)"
 pprint "Inetd"                  "$(ls -la /usr/sbin/in.* || echo 'N/A')"
 pprint "Suspected credentials in logs"       "$(grep -lE 'pass|crede|creds' /var/log/*.log 2> /dev/null || echo 'N/A')"
 pprint "Logs"                   "$(find /var/log -type f -exec ls -la {} \; 2> /dev/null)"
