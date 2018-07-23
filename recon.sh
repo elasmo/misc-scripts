@@ -41,7 +41,7 @@ recon "SUID files"          "$(find / -perm -4000 -type f 2> /dev/null)"
 recon "SUID owned by root"  "$(find / -uid 0 -perm -4000 -type f 2> /dev/null)"
 recon "GUID files"          "$(find / -perm -2000 -type f 2> /dev/null)"
 recon "Word writable"       "$(find / -perm -2 -type f 2> /dev/null)"
-recon "Word writable executavle" \
+recon "Word writable/executable" \
                             "$(find / ! -path "*/proc/*" -perm -2 -type f -print 2> /dev/null)"
 recon "World writeable directories" \
                             "$(find / -perm -2 -type d 2>/dev/null)"
