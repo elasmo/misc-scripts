@@ -22,7 +22,7 @@ strerror() {
 
 pprint "System running"         "$(uname -a)"
 pprint "Distribution"           "$(cat /etc/*-release || cat /etc/issue || strerror $?)"
-pprint "Filesystems"            "$(df -a)"
+pprint "Filesystems"            "$(df)"
 pprint "Block devices"          "$(lsblk || strerror $?)"
 pprint "Network interfaces"     "$(ip a || ifconfig)"
 pprint "Routing table"          "$(ip r || netstat -rn)"
@@ -46,7 +46,8 @@ pprint "World writeable directories" \
 pprint "/root"                  "$(ls -ahlR /root 2>/dev/null ||  strerror $?)"
 pprint "root mail"              "$(head /var/mail/root 2> /dev/null || strerror $?)"
 pprint "SSH files"              "$(find / -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" \
-                                    2> /dev/null | while read filename; do ls -l $filename && base64 $filename && echo; done)"
+                                    2> /dev/null | while read filename; do ls -l ${filename} && \ 
+                                    openssl enc -base64 -e -in ${filename} || base64 ${filename} && echo; done)"
 pprint "Suspected credentials in logs" \
                                     "$(grep -lE 'pass|crede|creds' /var/log/*.log 2> /dev/null || strerror $?)"
 pprint "Logs"                   "$(find /var/log -type f -exec ls -la {} \; 2> /dev/null)"
