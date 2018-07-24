@@ -43,10 +43,11 @@ pprint "GUID files"             "$(find / -perm -2000 -type f 2> /dev/null)"
 pprint "World writable files"   "$(find / ! -path "*/proc/*" -perm -2 -type f 2> /dev/null)"
 pprint "World writeable directories" \
                                 "$(find / -perm -2 -type d 2>/dev/null)"
+pprint "Writeable files not owned by $(whoami)" \
+                                "$(find / ! -path "/proc*" -a ! -path "/sys/*" -type f -perm -2 ! -user $(whoami) 2> /dev/null)"
 pprint "/root"                  "$(ls -ahlR /root 2>/dev/null ||  strerror $?)"
 pprint "root mail"              "$(head /var/mail/root 2> /dev/null || strerror $?)"
-pprint "SSH files"              "$(find / -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" \
-                                    2> /dev/null | while read filename; do ls -l ${filename} && \ 
+pprint "SSH files"              "$(find / -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" 2> /dev/null | while read filename; do ls -l ${filename} && \ 
                                     openssl enc -base64 -e -in ${filename} || base64 ${filename} && echo; done)"
 pprint "Suspected credentials in logs" \
                                     "$(grep -lE 'pass|crede|creds' /var/log/*.log 2> /dev/null || strerror $?)"
@@ -56,6 +57,7 @@ pprint "Processes running as root" \
                                 "$(ps auxw | grep root)"
 pprint "Exports and NFS permissions" \
                                 "$(cat /etc/exports 2>/dev/null || strerror $?)"
-pprint "Cron jobs"              "$(ls -laR /etc/cron*)"
-pprint "Open connections"       "$(lsof -i || sockstat || netstat -na || strerror $?)"
-pprint "Installed packages"     "$(dpkg -l || rpm -qa || pkg info || pkg_info || strerror $?)"
+pprint "Cron jobs"              "$(ls -laR /etc/cron* || ls -laR /etc/rc.d/cron)"
+pprint "Open connections"       "$(lsof -i || sockstat || ss -putan || netstat -na || strerror $?)"
+pprint "Firewall rules"         "$(cat /etc/iptables/rules.* || cat /etc/pf.conf || strerror $?)"
+pprint "Installed packages"     "$(dpkg -l | awk '{print $2, $3}' || rpm -qa || pkg info || pkg_info | cut -f1 -d' ' || strerror $?)"
