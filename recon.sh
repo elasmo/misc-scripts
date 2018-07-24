@@ -58,4 +58,4 @@ pprint "Exports and NFS permissions" \
                                 "$(cat /etc/exports 2>/dev/null || strerror $?)"
 pprint "Cron jobs"              "$(ls -laR /etc/cron*)"
 pprint "Open connections"       "$(lsof -i || sockstat || netstat -na || strerror $?)"
-pprint "Installed packages"     "$(dpkg -l || rpm -qa || pkg info || strerror $?)"
+pprint "Installed packages"     "$(dpkg -l || rpm -qa || pkg info || pkg_info || strerror $?)"
