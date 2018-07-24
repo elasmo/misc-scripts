@@ -57,7 +57,7 @@ pprint "Processes running as root" \
                                 "$(ps auxw | grep root)"
 pprint "Exports and NFS permissions" \
                                 "$(cat /etc/exports 2>/dev/null || strerror $?)"
-pprint "Cron jobs"              "$(ls -laR /etc/cron* || ls -laR /etc/rc.d/cron)"
+pprint "Cron jobs"              "$(ls -laR /var/spool/cron/crontabs || ls -laR /etc/cron* || ls -laR /etc/rc.d/cron)"
 pprint "Open connections"       "$(lsof -i || sockstat || ss -putan || netstat -na || strerror $?)"
 pprint "Firewall rules"         "$(cat /etc/iptables/rules.* || cat /etc/pf.conf || strerror $?)"
 pprint "Installed packages"     "$(dpkg -l | awk '{print $2, $3}' || rpm -qa || pkg info || pkg_info | cut -f1 -d' ' || strerror $?)"
