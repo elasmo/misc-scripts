@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ $(whoami) != "root" ]; then
-    error "$(whoami) are not welcome here!"
-fi
-
 ports="443 80"
 hosts=(
     "ftp.se.debian.org"
@@ -34,6 +30,10 @@ close_ports() {
         done
     done
 }
+
+if [ $(whoami) != "root" ]; then
+    error "$(whoami) are not welcome here!"
+fi
 
 trap close_ports EXIT
 
