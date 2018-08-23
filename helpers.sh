@@ -25,8 +25,7 @@ spiceme() {
     if [ "${running}" != "" ]; then
         virsh start ${1}
     elif [ ! "$(virsh dominfo ${1} 2> /dev/null)" ]; then
-        echo "Domain '${1}' not found."
-        echo
+        printf "Domain '${1}' not found.\n\n"
         virsh list --all
         return $?
     fi
