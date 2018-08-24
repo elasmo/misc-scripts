@@ -35,6 +35,8 @@ pprint "Last logged in"         "$(last || lastlog)"
 pprint "Sudo permissions"       "$(sudo -ln 2> /dev/null|| strerror $?)"
 pprint "Command history for $(whoami)" \
                                 "$(cat ~/.bash_history || cat ~/.history)"
+pprint "Python history for $(whoami)" \
+                                "$(cat ~/.python_history || strerror $?)"
 pprint "Environment"            "$(env)"
 pprint "Shells"                 "$(grep -v ^# /etc/shells)"
 pprint "SUID files"             "$(find / -perm -4000 -type f 2> /dev/null)"
