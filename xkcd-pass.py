@@ -3,7 +3,7 @@
 # XKCD-style passphrase
 # https://docs.python.org/3/library/secrets.html#recipes-and-best-practices
 #
-from random import choice
+from secrets import choice
 
 with open('/usr/share/dict/words') as f:
     words = [word.strip() for word in f]
