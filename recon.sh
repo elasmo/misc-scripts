@@ -56,7 +56,7 @@ pprint "Suspected credentials in logs" \
 pprint "Logs"                   "$(find /var/log -type f -exec ls -la {} \; 2> /dev/null)"
 pprint "Open files"             "$(lsof -i -n 2> /dev/null || strerror $?)"
 pprint "Processes running as root" \
-                                "$(ps auxw | grep root)"
+                                "$(ps auxw | grep root | grep -v grep)"
 pprint "Exports and NFS permissions" \
                                 "$(cat /etc/exports 2>/dev/null || strerror $?)"
 pprint "Cron jobs"              "$(ls -laR /var/spool/cron/crontabs || ls -laR /etc/cron* || ls -laR /etc/rc.d/cron)"
