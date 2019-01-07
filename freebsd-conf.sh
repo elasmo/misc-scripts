@@ -44,6 +44,11 @@ pkg install openntpd
 sysrc ntpd_enable="NO"
 sysrc openntpd_enable="YES"
 sysrc openntpd_flags="-s"
+cat <<EOF > /usr/local/etc/ntpd.conf
+servers pool.ntp.org
+sensor *
+constraints from "https://www.sunet.se"
+EOF
 
 # PF
 sysrc pf_enable="YES"
