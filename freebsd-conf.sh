@@ -101,7 +101,7 @@ security.bsd.unprivileged_read_msgbuf=0
 EOF
 
 # login.conf
-cat <<EOF > /etc/login.conf
+cat <<"EOF" > /etc/login.conf
 default:\
 	:passwd_format=sha512:\
 	:copyright=/etc/COPYRIGHT:\
