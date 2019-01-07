@@ -1,11 +1,29 @@
 #!/bin/sh
-
+#
+# TODO
+# - Set ssh auth to key-only
+# - add ${user} key to /usr/home/${user}/.ssh/authorized_keys
+#
 hostname="my_hostname"
 ip_address="1.2.3.4"
+user="elasmo"
 
+# Add user
+pw useradd -n ${user} -s /bin/sh -m -G wheel -w random
+
+# Set hostname & update system
 sysrc hostname="${hostname}"
 pkg update
 freebsd-update fetch install
+
+# Doas
+pkg install doas
+cat <<EOF > /usr/local/etc/doas.conf
+permit persist setenv { -ENV PS1=$DOAS_PS1 SSH_AUTH_SOCK } :wheel
+EOF
+
+# Syslog
+sysrc syslogd_flags="-ss"
 
 # OpenSSH
 pkg install openssh-portable
@@ -70,6 +88,57 @@ security.bsd.stack_guard_page=1
 security.bsd.unprivileged_proc_debug=0 
 security.bsd.unprivileged_read_msgbuf=0
 EOF
+
+# login.conf
+cat <<EOF > /etc/login.conf
+default:\
+	:passwd_format=sha512:\
+	:copyright=/etc/COPYRIGHT:\
+	:welcome=/etc/motd:\
+	:setenv=MAIL=/var/mail/$,BLOCKSIZE=K:\
+	:path=/sbin /bin /usr/sbin /usr/bin /usr/local/sbin /usr/local/bin ~/bin:\
+	:nologin=/var/run/nologin:\
+	:cputime=unlimited:\
+	:datasize=unlimited:\
+	:stacksize=unlimited:\
+	:memorylocked=64K:\
+	:memoryuse=unlimited:\
+	:filesize=unlimited:\
+	:coredumpsize=unlimited:\
+	:openfiles=unlimited:\
+	:maxproc=unlimited:\
+	:sbsize=unlimited:\
+	:vmemoryuse=unlimited:\
+	:swapuse=unlimited:\
+	:pseudoterminals=unlimited:\
+	:kqueues=unlimited:\
+	:umtxp=unlimited:\
+	:priority=0:\
+	:ignoretime@:\
+	:umask=022:\
+	:charset=UTF-8:\
+	:lang=en_US.UTF-8:
+
+standard:\
+	:tc=default:
+xuser:\
+	:tc=default:
+staff:\
+	:tc=default:
+daemon:\
+	:memorylocked=128M:\
+	:tc=default:
+news:\
+	:tc=default:
+dialer:\
+	:tc=default:
+
+root:\
+	:ignorenologin:\
+	:memorylocked=unlimited:\
+	:tc=default:
+EOF
+cap_mkdb /etc/login.conf
 
 # Periodic jobs tuning
 cat <<EOF > /etc/periodic.conf.local
