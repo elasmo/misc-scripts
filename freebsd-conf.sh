@@ -11,8 +11,12 @@ user="elasmo"
 # Add user
 pw useradd -n ${user} -s /bin/sh -m -G wheel -w random
 
-# Set hostname & update system
+# Timezone, hostname & keymap
+tzsetup -s /usr/share/zoneinfo/Europe/Stockholm
 sysrc hostname="${hostname}"
+sysrc keymap="se.kbd"
+
+# Update system
 pkg update
 freebsd-update fetch install
 
