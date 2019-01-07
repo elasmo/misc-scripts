@@ -153,5 +153,5 @@ cap_mkdb /etc/login.conf
 
 # Periodic jobs tuning
 cat <<EOF > /etc/periodic.conf.local
-daily_status_security_pkgaudit_enable
+daily_status_security_pkgaudit_enable="NO"
 EOF
