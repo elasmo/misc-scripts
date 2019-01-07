@@ -39,6 +39,7 @@ EOF
 sysrc clear_tmp_enable="YES"
 
 # sysctl tuning
+echo "cc_cubic_load=YES" >> /boot/loader.conf
 cat <<EOF > /etc/sysctl.conf
 kern.randompid=1                   
 kern.random.fortuna.minpoolsize=128
@@ -47,7 +48,6 @@ net.inet.ip.process_options=0
 net.inet.ip.random_id=1            
 net.inet.ip.redirect=0             
 net.inet.tcp.cc.algorithm=cubic    
-equires that you run "kldload cc_cubic" and add "cc_cubic_load=YES" to /boot/loader.conf
 net.inet.icmp.drop_redirect=1      
 net.inet.tcp.drop_synfin=1         
 net.inet.sctp.blackhole=2          
