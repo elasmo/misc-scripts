@@ -12,16 +12,17 @@ user="elasmo"
 pw useradd -n ${user} -s /bin/sh -m -G wheel -w random
 
 # Timezone, hostname & keymap
-tzsetup -s /usr/share/zoneinfo/Europe/Stockholm
+tzsetup -sr /usr/share/zoneinfo/Europe/Stockholm
 sysrc hostname="${hostname}"
 sysrc keymap="se.kbd"
 
 # Update system
+env ASSUME_ALWAYS_YES=YES pkg bootstrap
 pkg update
 freebsd-update fetch install
 
 # Doas
-pkg install doas
+pkg install -y doas
 cat <<EOF > /usr/local/etc/doas.conf
 permit persist setenv { -ENV PS1=$DOAS_PS1 SSH_AUTH_SOCK } :wheel
 EOF
@@ -30,7 +31,7 @@ EOF
 sysrc syslogd_flags="-ss"
 
 # OpenSSH
-pkg install openssh-portable
+pkg install -y openssh-portable
 sysrc sshd_enable="NO"
 sysrc openssh_enable="YES"
 cat <<EOF > /usr/local/etc/ssh/sshd_config
@@ -40,7 +41,7 @@ VersionAddendum none
 EOF
 
 # OpenNTPD
-pkg install openntpd
+pkg install -y openntpd
 sysrc ntpd_enable="NO"
 sysrc openntpd_enable="YES"
 sysrc openntpd_flags="-s"
@@ -65,7 +66,7 @@ sysrc sendmail_submit_enable="NO"
 sysrc sendmail_msp_queue_enable="NO" 
 
 # LibreSSL
-pkg install libressl
+pkg install -y libressl
 cat <<EOF > /etc/make.conf
 DEFAULT_VERSIONS+=ssl=libressl
 EOF
