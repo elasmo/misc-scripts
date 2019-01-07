@@ -23,6 +23,14 @@ sysrc ntpd_enable="NO"
 sysrc openntpd_enable="YES"
 sysrc openntpd_flags="-s"
 
+# PF
+sysrc pf_enable="YES"
+cat <<EOF > /etc/pf.conf
+set skip on lo
+block return
+pass
+EOF
+
 # Disable Sendmail
 sysrc sendmail_enable="NO"
 sysrc sendmail_outbound_enable="NO"                                                   
