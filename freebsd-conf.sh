@@ -19,7 +19,7 @@ sysrc keymap="se.kbd"
 # Update system
 env ASSUME_ALWAYS_YES=YES pkg bootstrap
 pkg update
-freebsd-update fetch install
+freebsd-update --not-running-from-cron fetch install
 
 # Doas
 pkg install -y doas
