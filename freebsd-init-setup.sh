@@ -4,7 +4,7 @@
 # - Set ssh auth to key-only
 # - add ${user} key to /usr/home/${user}/.ssh/authorized_keys
 # - future: install and configure log forwarder
-#
+#           ansible
 hostname="my_hostname"
 ip_address="1.2.3.4"
 user="elasmo"
@@ -25,9 +25,6 @@ pkg install -y doas
 cat <<EOF > /usr/local/etc/doas.conf
 permit persist setenv { -ENV PS1=$DOAS_PS1 SSH_AUTH_SOCK } :wheel
 EOF
-
-# Syslog
-sysrc syslogd_flags="-ss"
 
 # OpenSSH
 pkg install -y openssh-portable
@@ -56,6 +53,12 @@ sensor *
 constraints from "https://www.sunet.se"
 EOF
 
+# LibreSSL
+pkg install -y libressl
+cat <<EOF > /etc/make.conf
+DEFAULT_VERSIONS+=ssl=libressl
+EOF
+
 # PF
 sysrc pf_enable="YES"
 cat <<EOF > /etc/pf.conf
@@ -64,20 +67,13 @@ block return
 pass
 EOF
 
-# Disable Sendmail
+# rc.conf tunables
 sysrc sendmail_enable="NO"
 sysrc sendmail_outbound_enable="NO"                                                   
 sysrc sendmail_submit_enable="NO"                                                     
 sysrc sendmail_msp_queue_enable="NO" 
-
-# LibreSSL
-pkg install -y libressl
-cat <<EOF > /etc/make.conf
-DEFAULT_VERSIONS+=ssl=libressl
-EOF
-
-# Clear /tmp
 sysrc clear_tmp_enable="YES"
+sysrc syslogd_flags="-ss"
 
 # sysctl tuning
 echo "cc_cubic_load=YES" >> /boot/loader.conf
@@ -155,13 +151,11 @@ root:\
 EOF
 cap_mkdb /etc/login.conf
 
-# Periodic jobs tuning
+# Periodic jobs
 cat <<EOF > /etc/periodic.conf.local
 daily_status_security_pkgaudit_enable="NO"
 EOF
 
-# Set root password
+# Users
 pw mod user -n root -P -w random 
-
-# Add user
 pw useradd -n ${user} -s /bin/sh -m -G wheel -w random
