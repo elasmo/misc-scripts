@@ -41,6 +41,7 @@ ListenAddress ${ip_address}
 X11Forwarding no 
 AllowTcpForwarding
 VersionAddendum none
+PermitRootLogin no
 ChallengeResponseAuthentication no
 #AuthenticationMethods publickey
 UsePAM no
