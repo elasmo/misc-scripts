@@ -3,6 +3,7 @@
 # TODO
 # - Set ssh auth to key-only
 # - add ${user} key to /usr/home/${user}/.ssh/authorized_keys
+# - future: install and configure log forwarder
 #
 hostname="my_hostname"
 ip_address="1.2.3.4"
@@ -38,7 +39,12 @@ sysrc openssh_enable="YES"
 cat <<EOF > /usr/local/etc/ssh/sshd_config
 ListenAddress ${ip_address}
 X11Forwarding no 
+AllowTcpForwarding
 VersionAddendum none
+ChallengeResponseAuthentication no
+#AuthenticationMethods publickey
+UsePAM no
+Subsystem sftp  /usr/local/libexec/sftp-server
 EOF
 
 # OpenNTPD
