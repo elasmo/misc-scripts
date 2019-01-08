@@ -9,9 +9,6 @@ hostname="my_hostname"
 ip_address="1.2.3.4"
 user="elasmo"
 
-# Add user
-pw useradd -n ${user} -s /bin/sh -m -G wheel -w random
-
 # Timezone, hostname & keymap
 tzsetup -sr /usr/share/zoneinfo/Europe/Stockholm
 sysrc hostname="${hostname}"
@@ -162,3 +159,9 @@ cap_mkdb /etc/login.conf
 cat <<EOF > /etc/periodic.conf.local
 daily_status_security_pkgaudit_enable="NO"
 EOF
+
+# Set root password
+pw mod user -n root -P -w random 
+
+# Add user
+pw useradd -n ${user} -s /bin/sh -m -G wheel -w random
