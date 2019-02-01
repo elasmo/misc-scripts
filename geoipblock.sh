@@ -1,6 +1,6 @@
 #!/bin/sh
 # 
-# Generates a blacklist used  for GeoIP blocking using OpenBSD pf
+# Generates a blacklist used for GeoIP blocking using OpenBSD pf
 #
 # pf.conf example:
 # table <geoipblock> persist file "/etc/pf.geoipblock"
