@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
-# Create a LUKS encrypted volume and attach it to a virsh managed guest
+# Create a LUKS encrypted volume and attach it to
+# a virsh managed domain
 #
 # Usage examples:
 # host$ attach-luks myvm 5G
+# host$ attach-luks myvm
 # myvm$ sudo cryptsetup luksOpen /dev/vde cryptvol
 # myvm$ sudo mount /dev/mapper/cryptvol /mnt
 # 
-# If the size argument is omitted, 10G is used by default
-#
 set -e
 
 error() {
@@ -39,17 +39,17 @@ size="10G"
 vm_name="$1"
 vol_root="${HOME}/.cryptovols"
 crypt_vol="${vol_root}/${vm_name}_$(uuidgen)"
+tmp_mapper="$(uuidgen)"
 password=$(tr -dc A-Za-z0-9_ < /dev/urandom | head -c 64)
 
-trap 'error "Exiting"' EXIT 
-
+trap 'error "Bailing out"' ERR
 
 # Check if vm guest is existent 
 if [ ! "$(virsh dominfo $1 2> /dev/null)" ]; then 
     error "virsh domain $1 not found"
 fi
 
-# Set default size 10G if size is not specified
+# Set volume size if specified
 if [ $# -eq 2 ]; then
     size="$2"
 fi
@@ -64,8 +64,13 @@ fi
 pprint "Creating ${size} crypto volume ${crypt_vol}\n"
 truncate -s ${size} "${crypt_vol}"
 echo ${password} | sudo cryptsetup --hash sha512 --batch-mode luksFormat ${crypt_vol}
-
 pprint "Password: ${password}\n"
+
+pprint "Creating filesystem\n"
+echo ${password} | sudo cryptsetup open ${crypt_vol} ${tmp_mapper}
+sudo mkfs.ext4 /dev/mapper/${tmp_mapper} > /dev/null 2>&1
+sync
+sudo cryptsetup close ${tmp_mapper}
 
 pprint "Attaching ${crypt_vol} to ${vm_name}\n"
 virsh attach-disk --config ${vm_name} ${crypt_vol} vde --cache none > /dev/null
