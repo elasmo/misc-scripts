@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# Create a LUKS encrypted volume and attach it to
-# a virsh managed domain
+# Create a LUKS encrypted volume and attach it to a virsh managed domain
 #
 # Usage examples:
+# attach-luks <vm guest> <size>
+#
 # host$ attach-luks myvm 5G
-# host$ attach-luks myvm
 # myvm$ sudo cryptsetup luksOpen /dev/vde cryptvol
 # myvm$ sudo mount /dev/mapper/cryptvol /mnt
 # 
