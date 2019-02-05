@@ -1,10 +1,8 @@
 #!/bin/sh
 #
-# TODO
-# - Set ssh auth to key-only
-# - add ${user} key to /usr/home/${user}/.ssh/authorized_keys
-# - future: install and configure log forwarder
-#           ansible
+# Note: depricated in favour of Ansible
+#
+
 hostname="my_hostname"
 ip_address="1.2.3.4"
 user="elasmo"
@@ -33,7 +31,7 @@ sysrc openssh_enable="YES"
 cat <<EOF > /usr/local/etc/ssh/sshd_config
 ListenAddress ${ip_address}
 X11Forwarding no 
-AllowTcpForwarding
+AllowTcpForwarding no
 VersionAddendum none
 PermitRootLogin no
 ChallengeResponseAuthentication no
