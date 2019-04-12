@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
-# Simple PoC to calculate Shannon's entropy on words
-# contained in a file.
+# Simple PoC to calculate Shannon's entropy on 16 byte
+# chunks contained in a file
 #
 import math, sys
 from collections import Counter
