@@ -13,7 +13,8 @@ def entropy(s):
 
 if __name__ == "__main__":
     with open(sys.argv[1], "rb") as f:
-        data = f.read().split()
-
-        for s in data:
-            print("{}:{}:{}".format(sys.argv[1], entropy(s), s))
+        while True:
+            chunk = f.read(16)
+            if not chunk:
+                break
+            print("{}\t{}\t{}".format(sys.argv[1], entropy(chunk), chunk))
