@@ -5,7 +5,7 @@
 
 base="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd"
 
-iso_file="debian-9.4.0-amd64-netinst.iso"
+iso_file="debian-10.2.0-amd64-netinst.iso"
 sha_file="SHA512SUMS"
 sig_file="${sha_file}.sign"
 

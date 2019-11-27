@@ -4,7 +4,8 @@
 # ...preferably sourced from ~/.bashrc
 #
 
-alias vl='virsh list --all'
+alias vlr="virsh list --state-running --title | tail -n +3 | head -n -1 | awk '{print \$2}'"
+alias vl="virsh list --all --title | tail -n +2 | awk '{print \$2,\$3}' | sort -k1 | sed 's/shut/off/g' | sed 's/running/on/g' | column -t"
 
 if [ "$(pgrep ^spice-vdagent$)" == "" ]; then
     spice-vdagent
