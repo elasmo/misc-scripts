@@ -55,3 +55,11 @@ urldecode() {
     url="0:$(echo -n "$@" | sed 's/%/ /g')"
     echo $url | xxd -r
 }
+
+token_urlsafe() {
+    local nbytes=32
+    if [ "${1}" != "" ]; then
+        nbytes="${1}"
+    fi
+    echo "$(head -c ${nbytes} /dev/urandom | base64 -w0 | tr '+/' '-_' | tr -d  '=')"
+}
