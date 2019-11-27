@@ -25,13 +25,13 @@ which dirmngr > /dev/null || error "dirmngr not found"
 
 if [ ! -f ${iso_file} ]; then
     echo -n "=== Fetching ${iso_url}..."
-    curl -sLO "${iso_url}" && echo "OK" || error "failed"
+    curl -fsLO "${iso_url}" && echo "OK" || error "failed"
 else 
     echo "=== Found ${iso_file}"
 fi
 
 echo -n "=== Verifying hash..."
-curl -sO "${sha_url}" || error "fetch failed"
+curl -fsO "${sha_url}" || error "fetch failed"
 expected_hash=$(grep -E "^[0-9a-f]{128}\s{2}${iso_file}$" ${sha_file} | awk '{print $1}' || error "failed")
 iso_hash=$(openssl sha512 "${iso_file}" | cut -f2 -d' ')
 [ "${iso_hash}" = "${expected_hash}" ] && echo "OK" || error "hash mismatch"
