@@ -27,8 +27,8 @@ pprint "Block devices"          "$(lsblk || strerror $?)"
 pprint "Network interfaces"     "$(ip a || ifconfig -a)"
 pprint "Routing table"          "$(ip r || netstat -rn)"
 pprint "DNS server(s)"          "$(cat /etc/resolv.conf || dig example.com | grep SERVER || host -a example.com | grep from)"
-pprint "Users"                  "$(grep -vE ^# /etc/passwd)"
-pprint "Groups"                 "$(grep -Ev ^# /etc/group)"
+pprint "Users"                  "$(grep -vE '^#' /etc/passwd)"
+pprint "Groups"                 "$(grep -Ev '^#' /etc/group)"
 pprint "Admin accounts"         "$(grep -vE '^#' /etc/passwd | awk -F: '$3 == 0 { print $1}' || strerror $?)"
 pprint "Logged in"              "$(w || who -a || users || finger || pinky || strerror $?)"
 pprint "Last logged in"         "$(last || lastlog)"
@@ -38,11 +38,11 @@ pprint "Command history for $(whoami)" \
 pprint "Python history for $(whoami)" \
                                 "$(cat ~/.python_history || strerror $?)"
 pprint "Environment"            "$(env)"
-pprint "Shells"                 "$(grep -v ^# /etc/shells)"
+pprint "Shells"                 "$(grep -v '^#' /etc/shells)"
 pprint "SUID files"             "$(find / -perm -4000 -type f 2> /dev/null)"
 pprint "SUID owned by root"     "$(find / -uid 0 -perm -4000 -type f 2> /dev/null)"
 pprint "GUID files"             "$(find / -perm -2000 -type f 2> /dev/null)"
-pprint "World writable files"   "$(find / ! -path "*/proc/*" -perm -2 -type f 2> /dev/null)"
+pprint "World writable files"   "$(find / ! -path "*/proc/*" -a ! -path "/sys/*" -perm -2 -type f 2> /dev/null)"
 pprint "World writeable directories" \
                                 "$(find / -perm -2 -type d 2>/dev/null)"
 pprint "Writeable files not owned by $(whoami)" \
@@ -60,6 +60,6 @@ pprint "Processes running as root" \
 pprint "Exports and NFS permissions" \
                                 "$(cat /etc/exports 2>/dev/null || strerror $?)"
 pprint "Cron jobs"              "$(ls -laR /var/spool/cron/crontabs || ls -laR /etc/cron* || ls -laR /etc/rc.d/cron)"
-pprint "Open connections"       "$(lsof -i || sockstat || ss -putan || netstat -na || strerror $?)"
-pprint "Firewall rules"         "$(cat /etc/iptables/rules.* || cat /etc/pf.conf || strerror $?)"
+pprint "Open connections"       "$(lsof -i 2> /dev/null || sockstat 2> /dev/null || ss -putan || netstat -na || strerror $?)"
+pprint "Firewall rules"         "$(iptables -nvL 2> /dev/null || cat /etc/pf.conf 2> /dev/null || strerror $?)"
 pprint "Installed packages"     "$(dpkg -l | awk '{print $2, $3}' || rpm -qa || pkg info || pkg_info | cut -f1 -d' ' || strerror $?)"
