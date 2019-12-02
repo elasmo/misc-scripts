@@ -21,7 +21,7 @@ strerror() {
 }
 
 pprint "System running"         "$(uname -a)"
-pprint "Distribution"           "$(cat /etc/*-release || cat /etc/issue || strerror $?)"
+pprint "Distribution"           "$(cat /etc/*-release || cat /etc/issue || freebsd-vesion || strerror $?)"
 pprint "Filesystems"            "$(df)"
 pprint "Block devices"          "$(lsblk || strerror $?)"
 pprint "Network interfaces"     "$(ip a || ifconfig -a)"
