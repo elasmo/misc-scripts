@@ -56,10 +56,10 @@ urldecode() {
     echo $url | xxd -r
 }
 
-token_urlsafe() {
+token_urlsafe() {                                                                                                                                                                              
     local nbytes=32
-    if [ "${1}" != "" ]; then
-        nbytes="${1}"
+    if [ "$1" != "" ]; then
+        nbytes=$1
     fi
-    echo "$(head -c ${nbytes} /dev/urandom | base64 -w0 | tr '+/' '-_' | tr -d  '=')"
+    echo "$(dd if=/dev/urandom bs=${nbytes} count=1 2> /dev/null | base64 -w0 | tr '+/' '-_' | tr -d  '=')"
 }
