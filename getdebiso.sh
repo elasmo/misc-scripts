@@ -2,41 +2,42 @@
 #
 # Fetches debian iso, verifies sha512 hash and signature
 #
-
-base="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd"
-
-iso_file="debian-10.2.0-amd64-netinst.iso"
-sha_file="SHA512SUMS"
-sig_file="${sha_file}.sign"
-
-iso_url="${base}/${iso_file}"
-sha_url="${base}/SHA512SUMS"
-sig_url="${base}/SHA512SUMS.sign"
+#base="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd"
 
 error() {
     echo >&2 "$@"
     exit 1
 }
 
-which curl > /dev/null || error "curl not found" 
-which gpg > /dev/null || error "gpg not found"
-which openssl > /dev/null || error "openssl not found"
-which dirmngr > /dev/null || error "dirmngr not found"
-
-if [ ! -f ${iso_file} ]; then
-    echo -n "=== Fetching ${iso_url}..."
-    curl -fsLO "${iso_url}" && echo "OK" || error "failed"
-else 
-    echo "=== Found ${iso_file}"
+if [ $# != 1 ]; then
+    error "Usage: $(basename $0) <url>"
 fi
 
-echo -n "=== Verifying hash..."
-curl -fsO "${sha_url}" || error "fetch failed"
-expected_hash=$(grep -E "^[0-9a-f]{128}\s{2}${iso_file}$" ${sha_file} | awk '{print $1}' || error "failed")
-iso_hash=$(openssl sha512 "${iso_file}" | cut -f2 -d' ')
-[ "${iso_hash}" = "${expected_hash}" ] && echo "OK" || error "hash mismatch"
+iso_url="$1"
+base_url="${iso_url%/*}"
+iso_file="${iso_url##*/}"
+key_id="6294BE9B"
+TMP_SHA512=$(mktemp)
+TMP_SIG=$(mktemp)
 
-echo -n "=== Verifying signature..."
-gpg --keyserver keyring.debian.org --recv 6294BE9B 2> /dev/null || error "fetch key failed"
-curl -sO "${sig_url}" || error "fetch signature failed"
-gpg --verify ${sig_file} ${sha_file} 2> /dev/null && echo "OK" || error "verification failed"
+which curl > /dev/null || error "curl not found" 
+which openssl > /dev/null || error "openssl not found"
+which dirmngr > /dev/null || error "dirmngr not found"
+gpg_runtime=$(which gpg 2> /dev/null || which gpgv2 2> /dev/null) || error "gpg not found"
+
+# Download ISO
+if [ ! -f ./${iso_file} ]; then
+    echo "Requesting ${iso_url}..."
+    curl -fsLO "${iso_url}" && echo "OK" || error "Error retrieving ${iso_url}"
+else 
+    echo "Found $PWD/${iso_file}"
+fi
+
+# Verify SHA512 hash
+curl -fsO "${base_url}/SHA512SUMS" -o $TMP_SHA512 || error "fetch failed"
+sha512 -C SHA512SUMS "${iso_file}" || error "hash mismatch"
+
+# Verify signature
+${gpg_runtime} --keyserver keyring.debian.org --recv ${key_id}
+curl -O "${base_url}/SHA512SUMS.sign" -o $TMP_SIG || error "fetch signature failed"
+${gpg_runtime} --verify $TMP_SIG $TMP_SHA512 2> /dev/null && echo "OK" || error "verification failed"
