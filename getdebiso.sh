@@ -1,6 +1,10 @@
 #!/bin/sh
 #
-# Fetches debian iso, verifies sha512 hash and signature
+# Fetch a cd image and verify its hash and signature
+# Tested on Linux and OpenBSD with Debian ISOs
+#
+# Example:
+# sh getdebiso.sh https://cdimage.debian.org/(...)/debian.iso
 #
 
 cleanup() {
@@ -28,8 +32,8 @@ base_url="${iso_url%/*}"
 iso_file="${iso_url##*/}"
 sha_url="${base_url}/SHA512SUMS"
 sig_url="${base_url}/SHA512SUMS.sign"
-TMP_SHA=$(mktemp)
-TMP_SIG=$(mktemp)
+TMP_SHA=$(mktemp -t)
+TMP_SIG=$(mktemp -t)
 key_id="6294BE9B"
 
 # Check dependencies
@@ -39,7 +43,7 @@ done
 type gpg > /dev/null || type gpg2 > /dev/null || error "gpg not found"
    
 # Download ISO
-get_url $iso_url $iso_file
+get_url "$iso_url" $iso_file
 
 # Verify SHA512 hash
 get_url "$sha_url" $TMP_SHA
