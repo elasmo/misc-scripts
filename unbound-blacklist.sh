@@ -102,7 +102,7 @@ init() {
     unbound-control-setup
     cd $UNBOUND_CHROOT/etc
     chown root:$UNBOUND_USER unbound_control.* unbound_server.* 
-    rcctl restart unbound
+    rcctl restart unbound   # doesn't make any sense if unbound-control isn't enabled
 
     exit 0
 }
