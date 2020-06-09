@@ -7,11 +7,8 @@
 # sh unbound-blacklist.sh init
 #
 # Installs the script in /usr/local/bin, adds necessary privilege escalation
-# rules to doas.conf, installs crontab, creates keys for unbound-control
-# user with doas privileges to check and reload unbound configuration, and 
-# installs crontab.
-# Edit unbound.conf to enable unbound remote control and make sure $USER has 
-# access to web and dns.
+# rules to doas.conf, installs crontab, installs crontab and creates keys 
+# for unbound-control
 # 
 # Manual:
 # doas -u _blacklist sh /usr/local/bin/unbound-blacklist.sh
