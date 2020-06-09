@@ -128,7 +128,8 @@ main() {
     doas -u $UNBOUND_USER unbound-checkconf 1> /dev/null || \
         echo > $BLACKLIST_CONF && error "Syntax error in unbound configuration."
 
-    # Reload unbound configuration.
+    # Reload server and conf
+    # XXX: also flushes cache, we might want to dump and restore this
     doas -u $UNBOUND_USER unbound-control reload 1> /dev/null || \
         error "Reload unbound configuration failed."
 
