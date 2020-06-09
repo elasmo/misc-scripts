@@ -6,9 +6,9 @@
 # Setup:
 # sh unbound-blacklist.sh init
 #
-# Installs the script in /usr/local/bin, adds necessary privilege escalation
-# rules to doas.conf, installs crontab, installs crontab and creates keys 
-# for unbound-control
+# Installs the script in /usr/local/bin, adds script user, adds 
+# necessary privilege escalation rules to doas.conf, installs crontab 
+# and creates keys for unbound-control.
 # 
 # Manual:
 # doas -u _blacklist sh /usr/local/bin/unbound-blacklist.sh
