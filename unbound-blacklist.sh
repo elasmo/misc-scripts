@@ -1,14 +1,14 @@
 #!/bin/sh
 #
-# Script used with cron on OpenBSD to feed unbound a blacklist.
-# Assists in weeding out adservers and various unwanted traffic.
+# Script used with cron on OpenBSD to feed unbound a blacklist of domains not
+# to forward. Assists in weeding out adservers and various unwanted traffic.
 #
 # Setup:
 # sh unbound-blacklist.sh init
 #
-# Installs the script in /usr/local/bin, adds script user, adds 
-# necessary privilege escalation rules to doas.conf, installs crontab 
-# and creates keys for unbound-control.
+# Installs the script in /usr/local/bin, adds script user, adds necessary 
+# privilege escalation rules to doas.conf, installs crontab and creates keys 
+# for unbound-control.
 # 
 # Manual:
 # doas -u _blacklist sh /usr/local/bin/unbound-blacklist.sh
@@ -102,7 +102,7 @@ init() {
     unbound-control-setup
     cd $UNBOUND_CHROOT/etc
     chown root:$UNBOUND_USER unbound_control.* unbound_server.* 
-    rcctl restart unbound   # doesn't make any sense if unbound-control isn't enabled
+    rcctl restart unbound # doesn't make any sense if unbound-control isn't enabled
 
     exit 0
 }
@@ -110,25 +110,30 @@ init() {
 main() {
     [ "$1" == "init" ] && init
 
-    # Retrieve URLs and weed out duplicates
-    echo "$URLS" | xargs ftp -o -  > $_tmpunsorted || error "Fetching URLs failed."
+    # Retrieve URLs and sort out duplicates
+    echo "$URLS" | xargs ftp -o -  > $_tmpunsorted || \
+        error "Fetching URLs failed."
     sort -fu $_tmpunsorted > $_tmpsorted
 
-    # Create new blacklist
+    # Create new empty blacklist
     printf "# Managed by $SCRIPT_NAME\n# Last updated: $(date)\n" > $BLACKLIST_CONF
     
     # Validate domain names and create unbound conf
     while read -r name; do
         echo $name | grep -oE "$PATTERN" >/dev/null && \
-        echo "local-zone: \"$name"\" always_nxdomain >> $BLACKLIST_CONF
+            echo "local-zone: \"$name"\" always_nxdomain >> $BLACKLIST_CONF
     done < $_tmpsorted
 
-    # Check conf and reload unbound
+    # Check configuration syntax. Bail out and empty blacklist on error
     doas -u $UNBOUND_USER unbound-checkconf 1> /dev/null || \
-        error "Syntax error in unbound configuration." && echo > $BLACKLIST_CONF
-    doas -u $UNBOUND_USER unbound-control reload 1> /dev/null || error "Reload unbound configuration failed."
+        echo > $BLACKLIST_CONF && error "Syntax error in unbound configuration."
 
-    logger "$SCRIPT_NAME: Updated $BLACKLIST_CONF with $(wc -l $BLACKLIST_CONF | awk '{print $1}') entries." 
+    # Reload unbound configuration.
+    doas -u $UNBOUND_USER unbound-control reload 1> /dev/null || \
+        error "Reload unbound configuration failed."
+
+    logger "$SCRIPT_NAME: Updated $BLACKLIST_CONF with $(wc -l $BLACKLIST_CONF \
+        | awk '{print $1}') entries." 
 }
 
 main "$@"
