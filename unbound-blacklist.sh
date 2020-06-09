@@ -1,4 +1,21 @@
 #!/bin/sh
+#
+# Script used with cron on OpenBSD to feed unbound a blacklist.
+# Assists in weeding out adservers and various unwanted traffic.
+#
+# Setup:
+# sh unbound-blacklist.sh init
+#
+# Installs the script in /usr/local/bin, adds necessary privilege escalation
+# rules to doas.conf, installs crontab, creates keys for unbound-control
+# user with doas privileges to check and reload unbound configuration, and 
+# installs crontab.
+# Edit unbound.conf to enable unbound remote control and make sure $USER has 
+# access to web and dns.
+# 
+# Manual:
+# doas -u _blacklist sh /usr/local/bin/unbound-blacklist.sh
+#
 USER="_blacklist"
 UNBOUND_USER="_unbound"
 UNBOUND_CHROOT="/var/unbound"
@@ -34,7 +51,7 @@ _tmpsorted="$(mktemp)" || exit 1
 
 # Bailout with an error message and restore conf
 error() {
-    echo "$SCRIPT_NAME: ${1:-"failed"}"
+    logger "$SCRIPT_NAME: ${1:-"failed"}"
     exit 1
 }
 
@@ -45,7 +62,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-# Install
+# Initialize/install
 init() {
     if [ $(id -u) -ne 0 ]; then
         echo "You're not root"
@@ -70,8 +87,11 @@ init() {
     echo "== Setting up doas"
     local _doascnf_checkconf="permit nopass $USER as $UNBOUND_USER cmd unbound-checkconf"
     local _doascnf_reload="permit nopass $USER as $UNBOUND_USER cmd unbound-control args reload"
-    grep "$_doascnf_checkconf" /etc/doas.conf 2>/dev/null || echo "$_doascnf_checkconf" >> /etc/doas.conf
-    grep "$_doascnf_reload" /etc/doas.conf 2>/dev/null || echo "$_doascnf_reload" >> /etc/doas.conf
+
+    grep "$_doascnf_checkconf" /etc/doas.conf 2>/dev/null || \
+        echo "$_doascnf_checkconf" >> /etc/doas.conf
+    grep "$_doascnf_reload" /etc/doas.conf 2>/dev/null || \
+        echo "$_doascnf_reload" >> /etc/doas.conf
 
     # Install crontab
     echo "== Installing crontab"
@@ -87,20 +107,6 @@ init() {
     chown root:$UNBOUND_USER unbound_control.* unbound_server.* 
     rcctl restart unbound
 
-    cat << EOF
-1) Configure pf if necessary, eg.
-pass proto tcp from (egress) to port { http https } user $USER
-
-2) Configure unbound
-# vi $UNBOUND_CHROOT/etc/unbound.conf
-server:
-    include: "$BLACKLIST_CONF"
-    ...
-remote-control:
-    control-enable: yes
-    ...
-# rcctl restart unbound
-EOF
     exit 0
 }
 
@@ -125,7 +131,7 @@ main() {
         error "Syntax error in unbound configuration." && echo > $BLACKLIST_CONF
     doas -u $UNBOUND_USER unbound-control reload 1> /dev/null || error "Reload unbound configuration failed."
 
-    echo "$SCRIPT_NAME: Added $(wc -l $_tmpsorted | awk '{print $1}') entries to $BLACKLIST_CONF" 
+    logger "$SCRIPT_NAME: Updated $BLACKLIST_CONF with $(wc -l $BLACKLIST_CONF | awk '{print $1}') entries." 
 }
 
 main "$@"
