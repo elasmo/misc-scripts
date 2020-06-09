@@ -20,31 +20,29 @@ PATTERN="^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]
 BLACKLIST_CONF="$UNBOUND_CHROOT/etc/blacklist.conf"
 SCRIPT_NAME="$(basename $0)"
 
-# List of feeds
-# Expects one domain per line, if not $PATTERN won't match
+# Feed list
+# Expects file to contain one domain per line, else $PATTERN wont match.
+# Add '#' to beginning of line to temporary disable feed.
 URLS=$(cat << EOF
+https://pgl.yoyo.org/adservers/serverlist.php?hostformat=plain&showintro=0&mimetype=plaintext
 https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+https://block.energized.pro/ultimate/formats/domains.txt
+https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
+https://mirror1.malwaredomains.com/files/justdomains
+https://v.firebog.net/hosts/AdguardDNS.txt
+https://v.firebog.net/hosts/Airelle-hrsk.txt
+https://v.firebog.net/hosts/Airelle-trc.txt
+https://v.firebog.net/hosts/BillStearns.txt
+https://v.firebog.net/hosts/Easylist.txt
+https://v.firebog.net/hosts/Easyprivacy.txt
+https://v.firebog.net/hosts/Kowabit.txt
+https://v.firebog.net/hosts/Prigent-Ads.txt
+https://v.firebog.net/hosts/Prigent-Malware.txt
+https://v.firebog.net/hosts/Prigent-Phishing.txt
+https://v.firebog.net/hosts/Shalla-mal.txt
+https://v.firebog.net/hosts/static/w3kbl.txt
 EOF
 )
-#https://block.energized.pro/ultimate/formats/domains.txt
-#https://pgl.yoyo.org/adservers/serverlist.php?hostformat=plain&showintro=0&mimetype=plaintext
-#https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
-#https://mirror1.malwaredomains.com/files/justdomains
-
-#https://v.firebog.net/hosts/AdguardDNS.txt
-#https://v.firebog.net/hosts/Airelle-hrsk.txt
-#https://v.firebog.net/hosts/Airelle-trc.txt
-#https://v.firebog.net/hosts/BillStearns.txt
-#https://v.firebog.net/hosts/Easylist.txt
-#https://v.firebog.net/hosts/Easyprivacy.txt
-#https://v.firebog.net/hosts/Kowabit.txt
-#https://v.firebog.net/hosts/Prigent-Ads.txt
-#https://v.firebog.net/hosts/Prigent-Malware.txt
-#https://v.firebog.net/hosts/Prigent-Phishing.txt
-#https://v.firebog.net/hosts/Shalla-mal.txt
-#https://v.firebog.net/hosts/static/w3kbl.txt
-#EOF
-#)
 
 _tmpunsorted="$(mktemp)" || exit 1
 _tmpsorted="$(mktemp)" || exit 1
@@ -113,8 +111,8 @@ init() {
 main() {
     [ "$1" == "init" ] && init
 
-    # Retrieve URLs and sort out duplicates
-    echo "$URLS" | xargs ftp -o -  > $_tmpunsorted || \
+    # Retrieve URLs and remove duplicates
+    echo "$URLS" | grep -vE '^#' | xargs ftp -o -  > $_tmpunsorted || \
         error "Fetching URLs failed."
     sort -fu $_tmpunsorted > $_tmpsorted
 
@@ -135,13 +133,14 @@ main() {
     fi
 
     # Reload server and conf
-    # XXX: also flushes cache, we might want to dump and restore this
+    # XXX: also flushes cache, we may want to dump and restore this
     if ! doas -u $UNBOUND_USER unbound-control reload 1>/dev/null; then
         error "Reload unbound failed."
     fi
 
-    logger "$SCRIPT_NAME: Updated $BLACKLIST_CONF with $(wc -l $BLACKLIST_CONF \
-        | awk '{print $1}') entries." 
+    # Log
+    logger "$SCRIPT_NAME: Updated $BLACKLIST_CONF with $(wc -l $_tmpsorted | \
+        awk '{print $1}') entries." 
 }
 
 main "$@"
