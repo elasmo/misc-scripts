@@ -23,13 +23,14 @@ SCRIPT_NAME="$(basename $0)"
 # List of feeds
 # Expects one domain per line, if not $PATTERN won't match
 URLS=$(cat << EOF
-https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
-https://pgl.yoyo.org/adservers/serverlist.php?hostformat=plain&showintro=0&mimetype=plaintext
-https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
-https://mirror1.malwaredomains.com/files/justdomains
 https://block.energized.pro/ultimate/formats/domains.txt
 EOF
 )
+#https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+#https://pgl.yoyo.org/adservers/serverlist.php?hostformat=plain&showintro=0&mimetype=plaintext
+#https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
+#https://mirror1.malwaredomains.com/files/justdomains
+
 #https://v.firebog.net/hosts/AdguardDNS.txt
 #https://v.firebog.net/hosts/Airelle-hrsk.txt
 #https://v.firebog.net/hosts/Airelle-trc.txt
@@ -121,18 +122,20 @@ main() {
     printf "# Managed by $SCRIPT_NAME\n# Last updated: $(date)\n" > $BLACKLIST_CONF
     
     # Validate domain names and create unbound conf
-    while read -r name; do
-        echo $name | grep -oE "$PATTERN" >/dev/null && \
-            echo "local-zone: \"$name"\" always_nxdomain >> $BLACKLIST_CONF
+    while read name; do
+        if $name | grep -oE "$PATTERN" 1>/dev/null; then
+            echo "local-zone: \"$name\" always_nxdomain" 
+            #>> $BLACKLIST_CONF
+        fi
     done < $_tmpsorted
 
     # Check configuration syntax. Empty blacklist and bail out on error
-    doas -u $UNBOUND_USER unbound-checkconf 1> /dev/null || \
+    doas -u $UNBOUND_USER unbound-checkconf 1>/dev/null || \
         echo > $BLACKLIST_CONF && error "Syntax error in unbound configuration."
 
     # Reload server and conf
     # XXX: also flushes cache, we might want to dump and restore this
-    doas -u $UNBOUND_USER unbound-control reload 1> /dev/null || \
+    doas -u $UNBOUND_USER unbound-control reload 1>/dev/null || \
         error "Reload unbound configuration failed."
 
     logger "$SCRIPT_NAME: Updated $BLACKLIST_CONF with $(wc -l $BLACKLIST_CONF \
