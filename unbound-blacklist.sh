@@ -20,6 +20,8 @@ PATTERN="^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]
 BLACKLIST_CONF="$UNBOUND_CHROOT/etc/blacklist.conf"
 SCRIPT_NAME="$(basename $0)"
 
+# List of feeds
+# Expects one domain per line, if not $PATTERN won't match
 URLS=$(cat << EOF
 https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
 https://pgl.yoyo.org/adservers/serverlist.php?hostformat=plain&showintro=0&mimetype=plaintext
@@ -124,7 +126,7 @@ main() {
             echo "local-zone: \"$name"\" always_nxdomain >> $BLACKLIST_CONF
     done < $_tmpsorted
 
-    # Check configuration syntax. Bail out and empty blacklist on error
+    # Check configuration syntax. Empty blacklist and bail out on error
     doas -u $UNBOUND_USER unbound-checkconf 1> /dev/null || \
         echo > $BLACKLIST_CONF && error "Syntax error in unbound configuration."
 
