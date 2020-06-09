@@ -23,10 +23,10 @@ SCRIPT_NAME="$(basename $0)"
 # List of feeds
 # Expects one domain per line, if not $PATTERN won't match
 URLS=$(cat << EOF
-https://block.energized.pro/ultimate/formats/domains.txt
+https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
 EOF
 )
-#https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+#https://block.energized.pro/ultimate/formats/domains.txt
 #https://pgl.yoyo.org/adservers/serverlist.php?hostformat=plain&showintro=0&mimetype=plaintext
 #https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
 #https://mirror1.malwaredomains.com/files/justdomains
@@ -123,20 +123,22 @@ main() {
     
     # Validate domain names and create unbound conf
     while read name; do
-        if $name | grep -oE "$PATTERN" 1>/dev/null; then
-            echo "local-zone: \"$name\" always_nxdomain" 
-            #>> $BLACKLIST_CONF
+        if echo "$name" | grep -oE "$PATTERN" 1>/dev/null; then
+            echo "local-zone: \"$name\" always_nxdomain" >> $BLACKLIST_CONF
         fi
     done < $_tmpsorted
 
     # Check configuration syntax. Empty blacklist and bail out on error
-    doas -u $UNBOUND_USER unbound-checkconf 1>/dev/null || \
-        echo > $BLACKLIST_CONF && error "Syntax error in unbound configuration."
+    if ! doas -u $UNBOUND_USER unbound-checkconf 1>/dev/null; then
+        echo > $BLACKLIST_CONF
+        error "Syntax error in unbound configuration."
+    fi
 
     # Reload server and conf
     # XXX: also flushes cache, we might want to dump and restore this
-    doas -u $UNBOUND_USER unbound-control reload 1>/dev/null || \
-        error "Reload unbound configuration failed."
+    if ! doas -u $UNBOUND_USER unbound-control reload 1>/dev/null; then
+        error "Reload unbound failed."
+    fi
 
     logger "$SCRIPT_NAME: Updated $BLACKLIST_CONF with $(wc -l $BLACKLIST_CONF \
         | awk '{print $1}') entries." 
