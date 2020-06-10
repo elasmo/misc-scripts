@@ -47,17 +47,10 @@ else
     exit 1
 fi
 
-for i in $sorted; do
-    echo $i
-    echo
-done
-exit
-
 rm_this=""
-echo -n $sorted | while read i; do
+echo $sorted | while read i; do
     crc=$(echo "$i" | cut -f1 -d' ')
     name=$(echo "$i" | cut -f3- -d' ')
-    echo "Working on $i"
 
     c=0
     for rm_crc in $rm_this; do
