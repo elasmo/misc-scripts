@@ -42,6 +42,7 @@ else
     exit 1
 fi
 
+# Main loop
 echo "$sorted" | while read line; do
     crc=`echo "$line" | cut -f1 -d' '`
     name=`echo "$line" | cut -f3- -d' '`
