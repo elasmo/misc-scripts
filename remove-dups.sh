@@ -47,23 +47,43 @@ else
     exit 1
 fi
 
-echo $sorted | while read i; do
+for i in $sorted; do
+    echo $i
+    echo
+done
+exit
+
+rm_this=""
+echo -n $sorted | while read i; do
     crc=$(echo "$i" | cut -f1 -d' ')
     name=$(echo "$i" | cut -f3- -d' ')
+    echo "Working on $i"
+
+    c=0
+    for rm_crc in $rm_this; do
+        echo "-$rm_crc-"
+        if [ $rm_crc -eq $crc ]; then
+            echo rm -v "$name"
+            c=1
+        fi
+    done
+    [ $c -eq 1 ] && continue
 
     if [ $crc -eq $crc_old ]; then
+        echo "[*] Found duplicate"
         echo "[1] $crc $name"
         echo "[2] $crc_old $name_old"
 
         # Don't ask for user interaction if '-l' is specified
         [ $lflag -eq 1 ] && continue
 
-        echo -n "[*] Remove (1/2/[B]oth)? "
+        echo -n "[*] Remove (1/2/[B]oth/[A]ll)? "
         read user_input 0</dev/tty # haxx
         case $user_input in
             1) echo rm -vi "$name" ;;
             2) echo rm -vi "$name_old" ;;
             B) echo rm -vi "$name" "$name_old" ;;
+            A) rm_this="$crc " ;;
             *) echo "[*] Skipping" ;;
         esac
         echo
