@@ -1,28 +1,23 @@
 #!/bin/sh
-# Script to help removing duplicate files
-# 
-# Use `sh remove-dups.sh list` to list all duplicates without doing anything.
-# Expects a file with FreeBSD cksum(1) output (CRC OCTETS FILENAME). Examples:
-# remove-dups.sh -f directory/
-# find path/ -type f exec cksum {} \; >> list.cksum
-# remove-dups.sh -f list.cksum
-# remove-dups.sh -l -f list.cksum
 #
-# TODO
-#	option to delete all files with named checksum
-#	output as csv
-#set -x
-
+# File duplicate removal helper
+# 
+# remove-dups.sh -f directory/
+# remove-dups.sh -f cksum.out
+# remove-dups.sh -f cksum.out -l
+#
 usage() {
-    printf "Usage: %s [-l] [-d dir] [-f] file|dir\n" "$(basename $0)"
+    printf "Usage: %s [-l] [-d dir] [-f] file|dir\n" "`basename $0`"
     exit 2
 }
 
 crc_old=0
 name_old=""
+rm_this=""
 fflag=0
 lflag=0
 args=`getopt lf: $*` || usage
+
 set -- $args
 while :; do
     case "$1" in
@@ -37,31 +32,32 @@ done
 
 if [ -d "$file" ]; then
     # Checksum and sort if file is directory
-    chklist=$(find "$file" -type f -exec cksum {} \;)
-    IFS=$'\n' sorted=$(echo "$chklist" | sort -n -k 1)
+    chklist=`find "$file" -type f -exec cksum "{}" \;`
+    sorted=`echo "$chklist" | sort -n -k 1`
 elif [ -r "$file" ]; then
     # Sort if file is regular file
-    sorted=$(sort -n -k 1 "$file")
+    sorted=`sort -n -k 1 "$file"`
 else
     echo "Unable to read $file"
     exit 1
 fi
 
-rm_this=""
-echo $sorted | while read i; do
-    crc=$(echo "$i" | cut -f1 -d' ')
-    name=$(echo "$i" | cut -f3- -d' ')
+echo "$sorted" | while read line; do
+    crc=`echo "$line" | cut -f1 -d' '`
+    name=`echo "$line" | cut -f3- -d' '`
 
+    # Remove all files with crc in rm_this var
     c=0
     for rm_crc in $rm_this; do
-        echo "-$rm_crc-"
         if [ $rm_crc -eq $crc ]; then
             echo rm -v "$name"
             c=1
+            break
         fi
     done
     [ $c -eq 1 ] && continue
 
+    # Look for duplicates
     if [ $crc -eq $crc_old ]; then
         echo "[*] Found duplicate"
         echo "[1] $crc $name"
