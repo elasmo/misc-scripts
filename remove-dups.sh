@@ -18,7 +18,7 @@ usage() {
 
 crc_old=0
 name_old=""
-rm_this=""
+opt_rm=""
 fflag=0
 lflag=0
 args=`getopt lf: $*` || usage
@@ -53,20 +53,16 @@ echo "$sorted" | while read line; do
     name=`echo "$line" | cut -f3- -d' '`
 
     # Remove all files with crc in rm_this var
-    c=0
-    for rm_crc in $rm_this; do
-        if [ $rm_crc -eq $crc ]; then
+    for opt_crc in $opt_rm; do
+        if [ $opt_crc -eq $crc ]; then
             rm -v "$name"
-            c=1
-            break
+            continue 2
         fi
     done
-    [ $c -eq 1 ] && continue
 
     # Look for duplicates
     if [ $crc -eq $crc_old ]; then
-        # Print in CSV format and don't prompt for user interaction
-        # if '-l' is specified.
+        # Print CSV and don't prompt if '-l' is specified
         if [ $lflag -eq 1 ]; then
             echo "$crc,$name"
             echo "$crc_old $name_old"
@@ -79,13 +75,15 @@ echo "$sorted" | while read line; do
         echo -n "==> Remove (1/2/[B]oth/[A]ll)? "
 
         read user_input 0</dev/tty # haxx
+
         case $user_input in
             1) rm -v "$name" ;;
             2) rm -v "$name_old" ;;
             B) rm -v "$name" "$name_old" ;;
-            A) rm_this="$rm_this $crc " ;;
+            A) rm -v "$name" "$name_old"; opt_rm="$opt_rm $crc " ;;
             *) echo "==> Skipping.." ;;
         esac
+
         echo
     fi
 
