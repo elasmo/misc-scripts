@@ -65,7 +65,7 @@ echo "$sorted" | while read line; do
         # Print CSV and don't prompt if '-l' is specified
         if [ $lflag -eq 1 ]; then
             echo "$crc,$name"
-            echo "$crc_old $name_old"
+            echo "$crc_old,$name_old"
             continue
         fi
 
