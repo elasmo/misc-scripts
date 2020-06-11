@@ -2,12 +2,17 @@
 #
 # File duplicate removal helper
 # 
+# Calculates checksums using cksum(1) on files located in a directory or
+# takes previously generated file, roughly in the format "CRC LEN FILENAME\n"
+# The '-l' flag lists duplicates and don't prompt for user interaction.
+
+# Examples
 # remove-dups.sh -f directory/
 # remove-dups.sh -f cksum.out
 # remove-dups.sh -f cksum.out -l
 #
 usage() {
-    printf "Usage: %s [-l] [-d dir] [-f] file|dir\n" "`basename $0`"
+    printf "Usage: %s [-l] -f <file | dir>\n" "`basename $0`"
     exit 2
 }
 
@@ -51,7 +56,7 @@ echo "$sorted" | while read line; do
     c=0
     for rm_crc in $rm_this; do
         if [ $rm_crc -eq $crc ]; then
-            echo rm -v "$name"
+            rm -v "$name"
             c=1
             break
         fi
@@ -60,21 +65,26 @@ echo "$sorted" | while read line; do
 
     # Look for duplicates
     if [ $crc -eq $crc_old ]; then
-        echo "[*] Found duplicate"
-        echo "[1] $crc $name"
-        echo "[2] $crc_old $name_old"
+        # Print in CSV format and don't prompt for user interaction
+        # if '-l' is specified.
+        if [ $lflag -eq 1 ]; then
+            echo "$crc,$name"
+            echo "$crc_old $name_old"
+            continue
+        fi
 
-        # Don't ask for user interaction if '-l' is specified
-        [ $lflag -eq 1 ] && continue
+        echo "==> Found duplicate"
+        echo "1: $crc $name"
+        echo "2: $crc_old $name_old"
+        echo -n "==> Remove (1/2/[B]oth/[A]ll)? "
 
-        echo -n "[*] Remove (1/2/[B]oth/[A]ll)? "
         read user_input 0</dev/tty # haxx
         case $user_input in
-            1) echo rm -vi "$name" ;;
-            2) echo rm -vi "$name_old" ;;
-            B) echo rm -vi "$name" "$name_old" ;;
-            A) rm_this="$crc " ;;
-            *) echo "[*] Skipping" ;;
+            1) rm -v "$name" ;;
+            2) rm -v "$name_old" ;;
+            B) rm -v "$name" "$name_old" ;;
+            A) rm_this="$rm_this $crc " ;;
+            *) echo "==> Skipping.." ;;
         esac
         echo
     fi
