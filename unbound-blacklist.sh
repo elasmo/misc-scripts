@@ -122,8 +122,7 @@ main() {
     # Validate domain names and create unbound conf
     while read name; do
         if echo "$name" | grep -oE "$PATTERN" 1>/dev/null; then
-            if [ -O $BLACKLIST_CONF ] && [ -w $BLACKLIST_CONF ];  then
-                error "$BLACKLIST_CONF
+            # Respond with NXDOMAIN for all blacklisted domains
             echo "local-zone: \"$name\" always_nxdomain" >> $BLACKLIST_CONF
         fi
     done < $_tmpsorted
