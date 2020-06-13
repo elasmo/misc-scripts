@@ -21,8 +21,8 @@ name_old=""
 opt_rm=""
 fflag=0
 lflag=0
-args=`getopt lf: $*` || usage
 
+args=`getopt lf: $*` || usage
 set -- $args
 while :; do
     case "$1" in
