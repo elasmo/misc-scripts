@@ -11,5 +11,3 @@ fi
 
 url="0:$(echo -n "$@" | sed 's/%/ /g')"
 echo $url | xxd -r
-
-#echo -n $1 | xxd -plain | sed 's/\(..\)/%\1/g'
