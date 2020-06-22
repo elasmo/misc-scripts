@@ -16,25 +16,6 @@ snapshot() {
     virsh snapshot-create-as --domain "${1}" --name "snapshot-$(date +%s)"
 }
 
-spiceme() {
-    running="$(virsh list --inactive | awk '{print $2}' | grep ^${1}$)"
-
-    # Always revert to known-good state if name is set to guest
-    if [ "${1}" == "guest" ]; then
-        virsh snapshot-revert guest --current
-    fi
-
-    if [ "${running}" != "" ]; then
-        virsh start ${1}
-    elif [ ! "$(virsh dominfo ${1} 2> /dev/null)" ]; then
-        printf "Domain '${1}' not found.\n\n"
-        virsh list --all
-        return $?
-    fi
-
-    spicy -f --uri="$(virsh domdisplay $1)"
-}
-
 vmclone() {
     source="${1}"
     dest="${2}"
