@@ -2,8 +2,7 @@
 #
 # Sloppy script to parse greppable nmap output (-oG)
 #
-import re
-import sys
+import re, sys
 
 with open(sys.argv[1]) as fp:
     for line in fp:
