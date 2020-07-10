@@ -15,24 +15,25 @@ with open(sys.argv[1], "r") as fp:
             hostname  = re.sub("\(|\)", "", host_line[2])
 
             if fields[1].startswith("Ports"):
-                ports = fields[1].split(", ")
+                ports_line = fields[1].split(", ")
 
-                # Iterate over discovered ports
-                for port_field in ports:
+                # Loop over discovered ports
+                for ports in ports_line:
 
-                    # Port field ends with "/", we don't want to include that in our output
-                    port_field = re.sub("/$", "", port_field)
+                    # Remove trailing slash
+                    ports = re.sub("/$", "", ports)
 
                     # Pick out fields
-                    [ port, state, protocol, owner, service, rpc_info, version ] = port_field.split('/', 6);
+                    [ port, state, proto, owner, service, rpc_info, version ] \
+                            = ports.split('/', 6);
 
-                    # Skip to next item if port is closed
+                    # Skip to next if state isn't set to open
                     if state != 'open':
                         continue
 
-                    # First field starts with "Ports: ", we don't want that
+                    # Remove leading "Ports:" string 
                     port = re.sub("^Ports: ", "", port)
 
-                    # Nmap substitues "|" for "/" to not break parsing, change it back
+                    # Nmap substitues "|" for "/", change it back
                     service = re.sub("\|", "/", service)
                     version = re.sub("\|", "/", version)
