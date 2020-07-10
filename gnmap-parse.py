@@ -10,14 +10,14 @@ with open(sys.argv[1]) as fp:
         fields = line.split('\t')
 
         if fields[0].startswith("Host"):
-            host_line = fields[0].split(" ")
+            host_line = fields[0].split(' ')
 
             # Pick out IP address and hostname
             ip_addr   = host_line[1]
-            hostname  = re.sub('\(|\)', '', host_line[2])
+            hostname  = re.sub("\(|\)", '', host_line[2])
 
             if fields[1].startswith("Ports"):
-                ports_line = fields[1].split(', ')
+                ports_line = fields[1].split(", ")
 
                 # Loop over discovered ports
                 for ports in ports_line:
