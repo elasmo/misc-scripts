@@ -11,7 +11,7 @@ with open(sys.argv[1]) as fp:
         if fields[0].startswith("Host"):
             host_line = fields[0].split(' ')
 
-            # Pick out IP address and hostname
+            # Get IP address and hostname
             ip_addr   = host_line[1]
             hostname  = re.sub("\(|\)", '', host_line[2])
 
@@ -24,7 +24,7 @@ with open(sys.argv[1]) as fp:
                     # Remove trailing slash
                     ports = re.sub('/$', '', ports)
 
-                    # Pick out fields
+                    # Get fields 
                     [ port, state, proto, owner, service, rpc_info, version ] \
                             = ports.split('/', 6);
 
