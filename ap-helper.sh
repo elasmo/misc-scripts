@@ -5,8 +5,8 @@
 #
 set -e
 PATH="/usr/sbin:/usr/bin"
-ap_if="wlan0"
-ext_if="eth0"
+: ${ap_if:=wlan0}
+: ${ext_if:=eth0}
 net_prefix="192.0.2"
 ap_ssid="ap-$(head -c 4 < /dev/urandom | xxd -p)"
 ap_psk="$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 10)"
@@ -25,7 +25,7 @@ nft add chain ip filter prerouting { type nat hook prerouting priority 0\; polic
 nft add chain ip filter postrouting { type nat hook postrouting priority 100\; policy accept\; }
 nft add chain ip filter inbound { type filter hook input priority 0\; policy drop\; }
 nft add chain ip filter outbound { type filter hook output priority 0\; policy drop\; }
-nft add rule ip filter prerouting iifname ${ap_if} tcp dport { http, https } redirect to \:8080
+#nft add rule ip filter prerouting iifname ${ap_if} tcp dport { http, https } redirect to \:8080
 nft add rule ip filter postrouting oifname ${ext_if} masquerade
 nft add rule ip filter inbound iif lo accept
 nft add rule ip filter inbound iifname ${ap_if} accept
