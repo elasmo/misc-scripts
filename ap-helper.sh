@@ -5,8 +5,8 @@
 #
 set -e
 PATH="/usr/sbin:/usr/bin"
-: ${ap_if:=wlan0}
-: ${ext_if:=eth0}
+: "${ap_if:=wlan0}"
+: "${ext_if:=eth0}"
 net_prefix="192.0.2"
 ap_ssid="ap-$(head -c 4 < /dev/urandom | xxd -p)"
 ap_psk="$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 10)"
