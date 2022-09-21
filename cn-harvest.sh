@@ -8,17 +8,17 @@
 services="/file/path"
 
 get_field() {
-    echo $1 | cut -f $2 -d',' | tr -d '"'
+    echo "$1" | cut -f "$2" -d',' | tr -d '"'
 }
 
 while read i; do
-    ip="$(get_field $i 1)"
-    port="$(get_field $i 2)"
+    ip="$(get_field "$i" 1)"
+    port="$(get_field "$i" 2)"
 
-    if [ "$(echo $port | grep -E '80|445|135|139|21|22|port')" ]; then
+    if [ "$(echo "$port" | grep -E '80|445|135|139|21|22|port')" ]; then
         continue
     fi
 
-    cn="$(timeout 2 openssl s_client -connect $ip:$port < /dev/null 2> /dev/null | openssl x509 -noout -subject -in - 2> /dev/null | grep -oP "CN = \K([a-zA-Z0-9\*\._-]+)")"
+    cn="$(timeout 2 openssl s_client -connect "$ip":"$port" < /dev/null 2> /dev/null | openssl x509 -noout -subject -in - 2> /dev/null | grep -oP "CN = \K([a-zA-Z0-9\*\._-]+)")"
     echo "$ip,$port,$cn"
 done < $services
