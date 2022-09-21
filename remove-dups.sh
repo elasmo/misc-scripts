@@ -12,7 +12,7 @@
 # remove-dups.sh -f cksum.out -l
 #
 usage() {
-    printf "Usage: %s [-l] -f <file | dir>\n" "`basename $0`"
+    printf "Usage: %s [-l] -f <file | dir>\n" "$(basename "$0")"
     exit 2
 }
 
@@ -22,8 +22,8 @@ opt_rm=""
 fflag=0
 lflag=0
 
-args=`getopt lf: $*` || usage
-set -- $args
+args=$(getopt lf: "$*") || usage
+set -- "$args"
 while :; do
     case "$1" in
         -l) lflag=1; shift ;; 
@@ -37,11 +37,11 @@ done
 
 if [ -d "$file" ]; then
     # Checksum and sort if file is directory
-    chklist=`find "$file" -type f -exec cksum "{}" \;`
-    sorted=`echo "$chklist" | sort -n -k 1`
+    chklist=$(find "$file" -type f -exec cksum "{}" \;)
+    sorted=$(echo "$chklist" | sort -n -k 1)
 elif [ -r "$file" ]; then
     # Sort if file is regular file
-    sorted=`sort -n -k 1 "$file"`
+    sorted=$(sort -n -k 1 "$file")
 else
     echo "Unable to read $file"
     exit 1
@@ -49,19 +49,19 @@ fi
 
 # Main loop
 echo "$sorted" | while read line; do
-    crc=`echo "$line" | cut -f1 -d' '`
-    name=`echo "$line" | cut -f3- -d' '`
+    crc=$(echo "$line" | cut -f1 -d' ')
+    name=$(echo "$line" | cut -f3- -d' ')
 
     # Remove all files with crc in rm_this var
     for opt_crc in $opt_rm; do
-        if [ $opt_crc -eq $crc ]; then
+        if [ "$opt_crc" -eq "$crc" ]; then
             rm -v "$name"
             continue 2
         fi
     done
 
     # Look for duplicates
-    if [ $crc -eq $crc_old ]; then
+    if [ "$crc" -eq "$crc_old" ]; then
         # Print CSV and don't prompt if '-l' is specified
         if [ $lflag -eq 1 ]; then
             echo "$crc,$name"
@@ -72,7 +72,7 @@ echo "$sorted" | while read line; do
         echo "==> Found duplicate"
         echo "1: $crc $name"
         echo "2: $crc_old $name_old"
-        echo -n "==> Remove (1/2/[B]oth/[A]ll)? "
+        printf "==> Remove (1/2/[B]oth/[A]ll)? "
 
         read user_input 0</dev/tty # haxx
 
